@@ -1,6 +1,10 @@
 (ns protocols.core "Protocols, deftype, defrecord, reify"
     (:require [clojure.java.javadoc :refer [javadoc]]))
 
+;; ;;;;;;;;
+;; reify ;;
+;; ;;;;;;;;
+
 (comment
   (javadoc java.io.FileFilter)) ;; FileFilter is a Java interface
 
@@ -30,7 +34,9 @@
 
 ;; `reify` represents pure Clojure semantics, versus `proxy` and `gen-class` expose Java semantics.
 
-;; `defrecord` and `deftype`
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; `defrecord` and `deftype` ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Records and types are Clojure’s answer to Java types, in that they are Java classes.
 
@@ -78,6 +84,10 @@
 ;; We cannot treat them as maps.
 ;; They allow for mutable fields!
 
+;; ;;;;;;;;;;;;;;
+;; defprotocol ;;
+;; ;;;;;;;;;;;;;;
+
 ;; Protocols are to Clojure what interfaces are to Java.
 ;; Protocols are mere contracts and offer no implementation.
 
@@ -88,8 +98,10 @@
 (defprotocol Identify
   (id [_this]))
 
-;; Protocol usage
-;; `extend-protocol` and `extend-type` macros.
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; `extend-protocol` and `extend-type` macros ;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; Both macros work with types (defined by defrecord or deftype)
 
 (comment
@@ -114,61 +126,12 @@
 ; (out) 2546940
 
 (map #(.getName %) (.getMethods PersonRecord))
-; ("remove"
-;  "size"
-;  "get"
-;  "put"
-;  "equals"
-;  "values"
-;  "hashCode"
-;  "clear"
-;  "isEmpty"
-;  "iterator"
-;  "count"
-;  "entrySet"
-;  "putAll"
-;  "empty"
-;  "cons"
-;  "keySet"
-;  "containsValue"
-;  "containsKey"
-;  "create"
-;  "seq"
-;  "hasheq"
-;  "withMeta"
-;  "meta"
-;  "assoc"
-;  "assoc"
-;  "valAt"
-;  "valAt"
-;  "entryAt"
-;  "without"
-;  "equiv"
-;  "getLookupThunk"
-;  "getBasis"
-;  "toString"
-;  "getClass"
-;  "notify"
-;  "notifyAll"
-;  "wait"
-;  "wait"
-;  "wait"
-;  "assocEx"
-;  "spliterator"
-;  "forEach"
-;  "remove"
-;  "replace"
-;  "replace"
-;  "replaceAll"
-;  "merge"
-;  "putIfAbsent"
-;  "compute"
-;  "computeIfAbsent"
-;  "forEach"
-;  "getOrDefault"
-;  "computeIfPresent")
-;; functions are not added to PersonRecord
+; ("remove" "size" "get" "put" "equals" "values" "hashCode" "clear" "isEmpty" "iterator" "count" "entrySet" "putAll" "empty" "cons" "keySet" "containsValue"
+;  "containsKey" "create" "seq" "hasheq" "withMeta" "meta" "assoc" "assoc" "valAt" "valAt" "entryAt" "without" "equiv" "getLookupThunk" "getBasis" "toString"
+;  "getClass" "notify" "notifyAll" "wait" "wait" "wait" "assocEx" "spliterator" "forEach" "remove" "replace" "replace" "replaceAll" "merge" "putIfAbsent"
+;  "compute" "computeIfAbsent" "forEach" "getOrDefault" "computeIfPresent")
 
+;; methods from protocols are not added to records!
 (filter
  #(re-find #"pretty-print|id" %)
  (map #(.getName %) (.getMethods PersonRecord)))
@@ -204,13 +167,18 @@
   (pretty-print reified-show))
 ; "I am anonymous"
 
-;; `extend-protocol` and `extend-type` rely on a function named `extend`, which can be use directly.
+;; ;;;;;;;;;
+;; extend ;;
+;; ;;;;;;;;;
 
+;; `extend-protocol` and `extend-type` rely `extend`
+
+;; `extene` is a function
 (extend PersonRecord
   Show
-  {:pretty-print #(str "My name is " (:name %))}
+  {:pretty-print #(str "My name is " (:name %))} ; protocol is just a normal map !
   Identify
-  {:id #(.hashCode (:name %))})
+  {:id #(.hashCode (:name %))})                  ; protocol is just a normal map !
 
 (let [rich (PersonRecord. "Rich")]
   (println (pretty-print rich))
@@ -237,7 +205,7 @@
 ; (out) I am mixed in. Name is: Rich
 ; (out) 2546940
 
-;; implementing a protocol by inlining it
+;; implementing a protocol by inlining
 #_{:clj-kondo/ignore [:redefined-var]}
 (defrecord PersonRecord
            [name]
